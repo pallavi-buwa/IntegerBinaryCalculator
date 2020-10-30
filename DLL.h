@@ -36,6 +36,7 @@ void change_sign(list *l3, list *l1, list *l2);
 list calc(list l1, list l2, char op);
 int precedence(char op);
 void infix_eval(char *s);
+void rm_zero(list *l);
 
 //stack_operands functions
 void init1(stack_operands *s, int len);
@@ -54,4 +55,5 @@ char pop2(stack_operators *s);
 
 
 void change_base(list l, int b);
+void trigo_fn(list l, int choice);
 

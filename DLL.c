@@ -4,6 +4,7 @@
 #include "DLL.h"
 #include <string.h>
 
+#define PI 3.14159
 
 
 void init(list* l) {
@@ -154,6 +155,24 @@ list sub(list l1, list l2) {
     list l3;
     init(&l3);
     node *end1, *end2;
+    rm_zero(&l1);
+    rm_zero(&l2);
+    if(l1.n == NULL && l2.n == NULL) {
+        append(&l3, 0);
+        return l3;
+    }
+    else if(l1.n != NULL && l2.n == NULL) {
+        return l1;
+    }
+    else if(l1.n == NULL && l2.n != NULL) {
+        if(l2.sign == '-'){
+            l2.sign = '+';
+        }
+        else {
+            l2.sign = '-';
+        }
+        return l2;
+    }
 
     if(l1.sign == '-' && l2.sign == '+') {   //-num1 - (+num2)
         l2.sign = '-';
@@ -287,7 +306,7 @@ list mul(list l1, list l2) {
 list division(list l1, list l2) {
 
     int x = compare(l1, l2);
-
+    int i = 0;
     list l3;
     init(&l3);
 
@@ -307,41 +326,108 @@ list division(list l1, list l2) {
     }
     else {
 
-        list i;
-        init(&i);
-        append(&i, 2);
+        int length1 = l1.length;
+        int length2 = l2.length;
+        node *p = l1.n;
+        node *t = l2.n;
 
-        list j;
+
+        while(p->d == 0) {
+            p = p->next;
+        }
+
+        while(t->d == 0) {
+            t = t->next;
+        }
+        int digits = 0;
+        while(t != NULL) {
+            digits++;
+            t = t->next;
+        }
+
+        list temp, num, l22, q, j, quo;
+
+        init(&q);
         init(&j);
+        init(&num);
+        init(&temp);
+        init(&l22);
+        init(&quo);
+
+        append(&q, 0);
         append(&j, 1);
+        l22 = l2;
 
-        l3 = mul(l2, i);
+        int pass = 0;
 
-        int r;
-        r = compare(l3, l1);
-        while(r < 0) {
-            i = add(i, j);
-            l3 = mul(l2, i);
-            r = compare(l3, l1);
+        while(p != NULL) {
+            if(pass == 0) {
+                for(i = 0; i < digits; i++) {
+                    if(p != NULL) {
+                        append(&num, p->d);    //num 38
+                        p = p->next;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                pass++;
+            }
+            else {
+                append(&num, p->d);
+                p = p->next;
+            }
+            int r = compare(l2, num);    //divisor with multiplied number
+            if(r == INT_MIN) {
+                append(&quo, 0);
+                continue;
+            }
 
+            int check = 0;
+            l22 = l2;
+
+            while(r < 0) {
+                q = add(q, j);
+                l22 = mul(l2, q);
+                r = compare(l22, num);
+                check++;
+            }
+
+            if(check == 0 && r != 0) {
+                append(&quo, 0);
+                temp = num;
+            }
+            else if(check == 0 && r == 0){
+                append(&quo, 1);
+                temp = sub(num, l22);
+            }
+
+            else if(r == 0) {
+                append(&quo, q.tail->d);
+                temp = sub(num, l22);
+            }
+            else {
+                q = sub(q, j);
+                append(&quo, q.tail->d);
+                l22 = sub(l22, l2);
+                temp = sub(num, l22);
+            }
+            init(&q);
+            append(&q, 0);
+            num = temp;
+            init(&l22);
         }
 
-        if(r == 0) {
-            change_sign(&i, &l1, &l2);
-            return (i);
-        }
-        else {
-            i = sub(i, j);
-            change_sign(&i, &l1, &l2);
-            return (i);
-        }
+        change_sign(&i, &l1, &l2);
+        return (quo);
     }
 
 }
 
+
 int compare(list l1, list l2) {
 
-    int c1 = 0, c2 = 0, count_zero = 0;
+    int c1 = 0, c2 = 0, count_zero = 0, c11 = 0, c22 = 0;
     node *p = l1.n;
     node *q = l2.n;
 
@@ -351,6 +437,7 @@ int compare(list l1, list l2) {
     while(q != NULL) {
         if(q->d == 0) {
             count_zero++;
+            c22++;      //leading zeros
         }
         else {
             break;
@@ -360,10 +447,20 @@ int compare(list l1, list l2) {
     if(count_zero == c2) {
         return INT_MIN;
     }
+    while(p != NULL) {
+        if(p->d == 0) {
+            p = p->next;
+            c11++;
+        }
+        else {
+            break;
+        }
+    }
 
-    p = l1.n;
-    q = l2.n;
-    int comp = c1 - c2;
+
+    //p = l1.n;
+    //q = l2.n;
+    int comp = (c1 - c11) - (c2 - c22);
 
     if(comp < 0) {
         return -1;
@@ -809,10 +906,94 @@ void change_base(list l, int b) {
         init(&l5);
         init(&l2);
     }
+    printf("Final answer:");
     display(ans);
     return;
 }
 
 
 
+void rm_zero(list *l) {
 
+    node *p = l->n;
+    while(p != NULL && p->d == 0) {
+
+        l->length = l->length - 1;
+        l->n = p->next;
+        p = p->next;
+        if(p != NULL) {
+            free(p->prev);
+            p->prev = NULL;
+        }
+    }
+}
+
+
+
+
+void trigo_fn(list l, int choice) {
+
+    list l1, l2, d, m, s;
+    init(&l1);
+    init(&l2);
+    init(&d);
+    init(&m);
+    init(&s);
+
+    l1 = l;
+    char t[] = "360";
+    l2 = extract(t);
+
+    double angle_deg, ans, angle_rad;
+
+
+    int r = compare(l1, l2);
+
+    if(r <= 0) {
+        node* p = l1.n;
+        while(p != NULL) {
+            angle_deg = ((angle_deg * 10.0) + (p->d));
+            p = p->next;
+        }
+
+        angle_rad = ((angle_deg * PI) / 180.0);
+
+        if(l1.sign == '-') {
+            angle_rad = angle_rad * (-1);
+        }
+
+        if(choice == 1) {       //sin
+            ans = sin(angle_rad);
+        }
+        else if(choice == 2) {  //cos
+            ans = cos(angle_rad);
+        }
+
+    }
+    else {
+
+        d = division(l1, l2);
+        m = mul(d, l2);
+        s = sub(l1, m);
+
+        node* p = s.n;
+        while(p != NULL) {
+            angle_deg = ((angle_deg * 10.0) + (p->d));
+            p = p->next;
+        }
+
+        angle_rad = ((angle_deg * PI) / 180.0);
+
+        if(l1.sign == '-') {
+            angle_rad = angle_rad * (-1);
+        }
+
+        if(choice == 1) {       //sin
+            ans = sin(angle_rad);
+        }
+        else if(choice == 2) {  //cos
+            ans = cos(angle_rad);
+        }
+    }
+    printf("Answer = %lf \n", ans);
+}

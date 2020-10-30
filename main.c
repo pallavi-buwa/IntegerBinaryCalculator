@@ -5,60 +5,73 @@
 
 int main()
 {
-    int ch = 0, ch1 = 0;
+    int ch = 0, base = 0, choice = 0;
     char s[50] = {};
     list L;
     init(&L);
 
     while(1) {
+
+        init(&L);
+
         printf("\n\n");
         printf("0. Exit\n");
         printf("1. Calculator\n");
         printf("2. Base Change\n");
+        printf("3. Trignometric functions\n");
         printf("Choice: ");
         scanf("%d", &ch);
         getchar();
         printf("\n");
 
-        if(ch <= 0 || ch > 2) {
+        if(ch <= 0 || ch > 3) {
             exit(0);
         }
         else if(ch == 1) {
             gets(s);
             infix_eval(s);
         }
-        else {
+        else if(ch == 2){
             printf("\n\n");
-            printf("1. decimal to binary\n");
-            printf("2. decimal to octal\n");
-           // printf("3. decimal to hexadecimal\n");
-            printf("0. exit\n");
-            printf("Choice: ");
-            scanf("%d", &ch1);
+            printf("Enter the base to be converted to (2 - 9)\n");
+            scanf("%d", &base);
             getchar();
             printf("\n");
 
-            if(ch1 == 1) {
+            printf("Enter the number in decimal: ");
+
+            if(base >= 2 && base <= 9) {
                 gets(s);
                 L = extract(s);
-                change_base(L, 2);
+                change_base(L, base);
             }
-            else if(ch1 == 2) {
-                gets(s);
-                L = extract(s);
-                change_base(L, 8);
-            }
-            /*else if(ch1 == 3) {
-                gets(s);
-                L = extract(s);
-                change_base(L, 16);
-            }*/
             else {
-                exit(0);
+                printf("Incorrect base\n");
+                exit(1);
+            }
+        }
+        else {
+            printf("1. sin\n");
+            printf("2. cos\n");
+            printf("Choice :");
+            scanf("%d", &choice);
+            getchar();
+            printf("\n");
+
+            printf("Enter the angle in degrees: ");
+            gets(s);
+            L = extract(s);
+            if(choice == 1) {
+                trigo_fn(L, 1);
+            }
+            else if(choice == 2) {
+                trigo_fn(L, 2);
+            }
+            else {
+                printf("Incorrect option\n");
+                exit(1);
             }
         }
     }
-
-
     return 0;
 }
