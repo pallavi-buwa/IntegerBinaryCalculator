@@ -940,9 +940,16 @@ void trigo_fn(list l, int choice) {
     init(&m);
     init(&s);
 
+
     l1 = l;
     char t[] = "360";
     l2 = extract(t);
+    int sign_change = 0;
+
+    if(l1.sign == '-') {
+        l1.sign = '+';
+        sign_change = 1;
+    }
 
     double angle_deg, ans, angle_rad;
 
@@ -958,12 +965,12 @@ void trigo_fn(list l, int choice) {
 
         angle_rad = ((angle_deg * PI) / 180.0);
 
-        if(l1.sign == '-') {
-            angle_rad = angle_rad * (-1);
-        }
 
         if(choice == 1) {       //sin
             ans = sin(angle_rad);
+            if(sign_change == 1) {
+                ans = ans * (-1);
+            }
         }
         else if(choice == 2) {  //cos
             ans = cos(angle_rad);
@@ -984,12 +991,13 @@ void trigo_fn(list l, int choice) {
 
         angle_rad = ((angle_deg * PI) / 180.0);
 
-        if(l1.sign == '-') {
-            angle_rad = angle_rad * (-1);
-        }
+        printf("angle in rad %lf\n", angle_rad);
 
         if(choice == 1) {       //sin
             ans = sin(angle_rad);
+            if(sign_change == 1) {
+                ans = ans * (-1);
+            }
         }
         else if(choice == 2) {  //cos
             ans = cos(angle_rad);
